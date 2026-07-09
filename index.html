@@ -40,6 +40,27 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
 
+    <!-- Navigation Bar -->
+    <nav class="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-3 px-6 shadow-lg border-b-4 border-emerald-500 no-print">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap text-emerald-400 text-xl"></i>
+                <span class="font-black text-sm">TRAINING PORTAL</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 justify-center">
+                <a href="index.html" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-calculator"></i> Kalkulator Kos
+                </a>
+                <a href="templat_buku_tunai_lejar_manual.html" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-table"></i> Templat Buku Tunai
+                </a>
+                <a href="panduan_pengiraan_kos_harga_sedia_cetak_pdf.html" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-book"></i> Panduan Kos
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <!-- Header Panel Kawalan (Hanya muncul di skrin, hilang apabila dicetak) -->
     <header class="bg-slate-900 text-white py-4 px-6 shadow-md no-print border-b border-slate-800">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -76,27 +97,27 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">🍔 1. Kos Bahan Mentah (RM/Unit)</label>
-                        <input type="number" id="inputKosBahan" step="0.10" value="3.10" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <input type="number" id="inputKosBahan" step="0.10" value="3.10" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono font-bold text-slate-700">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">💼 2. Gaji Bulanan Diingini (RM)</label>
-                        <input type="number" id="inputGajiBulanan" step="50" value="800" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <input type="number" id="inputGajiBulanan" step="50" value="800" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono font-bold text-slate-700">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">📈 3. Sasaran Jualan Bulanan (Unit)</label>
-                        <input type="number" id="inputSasaranUnit" step="10" value="1000" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <input type="number" id="inputSasaranUnit" step="10" value="1000" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono font-bold text-slate-700">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">💰 4. Untung Bersih Diingini (RM/Unit)</label>
-                        <input type="number" id="inputUntungUnit" step="0.10" value="2.10" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <input type="number" id="inputUntungUnit" step="0.10" value="2.10" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono font-bold text-slate-700">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">🔌 5. Kos Operasi Bulanan Lain (RM)</label>
-                        <input type="number" id="inputKosOperasi" step="10" value="50" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <input type="number" id="inputKosOperasi" step="10" value="50" oninput="jalankanKiraanSimulasi()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono font-bold text-slate-700">
                     </div>
                 </div>
 
