@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Templat Buku Tunai & Lejar Manual Mandiri</title>
+    <!-- Tailwind CSS untuk reka bentuk premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome untuk ikon grafik yang menarik -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Penambahbaikan untuk input sel supaya kelihatan seperti Excel/Notion */
+        .excel-input {
+            background-color: transparent;
+            border: 1px solid transparent;
+            transition: all 0.15s ease-in-out;
+        }
+        .excel-input:hover {
+            border-color: #cbd5e1;
+            background-color: #f8fafc;
+        }
+        .excel-input:focus {
+            border-color: #10b981;
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+        }
+        /* Sembunyikan anak panah lalai pada input nombor */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; }
+            .print-border-none { border: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+    <!-- Header Aplikasi -->
+    <header class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-850 text-white py-6 px-6 shadow-md border-b border-emerald-950 no-print">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-emerald-500 rounded-xl text-slate-950 font-bold shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl tracking-wide uppercase">Buku Tunai & Lejar Manual</h1>
+                    <p class="text-xs text-emerald-200 font-medium">Sistem Lembaran Latihan Kosong Mandiri • Bengkel Pengurusan Kewangan</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-4 rounded-xl text-xs border border-white/20 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                </button>
+                <button onclick="paparModalReset()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Set Semula Lembaran
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Kandungan Utama -->
+    <main class="max-w-7xl mx-auto p-4 md:p-8 flex-1 w-full space-y-6">
+
+        <!-- Dashboard Ringkasan / Live Balance (Excel Style) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Baki Tunai -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jumlah Baki Tunai (Laci)</span>
+                    <h3 id="lbl-total-tunai" class="text-2xl font-black text-slate-900 mt-1">RM 0.00</h3>
+                    <span id="lbl-status-tunai" class="text-[9px] font-bold text-slate-400 uppercase">Sedia diisi</span>
+                </div>
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl"><i class="fa-solid fa-wallet"></i></div>
+            </div>
+
+            <!-- Baki Bank -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jumlah Baki Bank (Akaun)</span>
+                    <h3 id="lbl-total-bank" class="text-2xl font-black text-slate-900 mt-1">RM 0.00</h3>
+                    <span id="lbl-status-bank" class="text-[9px] font-bold text-slate-400 uppercase">Sedia diisi</span>
+                </div>
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl text-xl"><i class="fa-solid fa-building-columns"></i></div>
+            </div>
+
+            <!-- Bilangan Baris Urus Niaga -->
+            <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Statistik Rekod Manual</span>
+                    <h3 id="lbl-total-rekod" class="text-2xl font-black mt-1">10 Baris</h3>
+                    <p class="text-[9px] text-slate-400 mt-0.5">Urus niaga aktif direkodkan dalam sistem.</p>
+                </div>
+                <div class="p-3 bg-slate-800 rounded-xl text-amber-400 text-xl"><i class="fa-solid fa-list-ol"></i></div>
+            </div>
+        </div>
+
+        <!-- Panel Utama Hamparan Buku Tunai -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-table text-emerald-600"></i> Lembaran Buku Tunai & Pengelasan Lejar Mandiri (Kosong)
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Masukkan urus niaga anda secara manual. Baki tunai dan baki bank akan dikira secara automatik baris demi baris.</p>
+                </div>
+                <button onclick="tambahBarisUrusNiaga()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-xl text-xs shadow-md shadow-emerald-500/10 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Tambah Baris Baru
+                </button>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1100px]">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 text-[10px] uppercase font-bold border-b border-slate-200 select-none">
+                            <th class="py-4 px-3 border-r border-slate-200 w-24 text-center">Tarikh</th>
+                            <th class="py-4 px-4 border-r border-slate-200">Situasi / Butiran Urus Niaga (Isi Manual)</th>
+                            <th class="py-4 px-3 border-r border-slate-200 w-44 text-center">Kategori Lejar</th>
+                            <th class="py-4 px-3 text-emerald-700 bg-emerald-50/50 text-center border-r border-emerald-100">Debit (Tunai)</th>
+                            <th class="py-4 px-3 text-emerald-700 bg-emerald-50/50 text-center border-r border-slate-200">Debit (Bank)</th>
+                            <th class="py-4 px-3 text-rose-700 bg-rose-50/50 text-center border-r border-rose-100">Kredit (Tunai)</th>
+                            <th class="py-4 px-3 text-rose-700 bg-rose-50/50 text-center border-r border-slate-200">Kredit (Bank)</th>
+                            <th class="py-4 px-4 text-slate-700 text-center border-r border-slate-100">Baki (Tunai)</th>
+                            <th class="py-4 px-4 text-slate-700 text-center border-r border-slate-200">Baki (Bank)</th>
+                            <th class="py-4 px-2 text-center no-print w-16">Padam</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manual-ledger-rows" class="text-xs divide-y divide-slate-100">
+                        <!-- Dynamic Editable Rows populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer Cetak Ringkasan -->
+            <div class="bg-slate-50 p-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-info"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">Format Pembelajaran Amali Bebas</h4>
+                        <p class="text-xs text-slate-500">Isi situasi kes jualan harian anda secara bebas dan cetak lembaran kerja anda.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 no-print">
+                    <button onclick="kosongkanSemuaNilai()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2.5 rounded-xl transition">
+                        Padam Semua Nilai Sahaja
+                    </button>
+                    <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 px-6 rounded-xl transition shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i> Cetak Lembaran Kerja
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Reset/Padam Keseluruhan (Ganti Alert/Confirm) -->
+    <div id="reset-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="font-black text-slate-900 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Amaran Set Semula
+                </h3>
+                <button onclick="tutupModalReset()" class="text-slate-400 hover:text-slate-600 transition text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p id="reset-modal-text" class="text-xs text-slate-500 leading-relaxed mb-6">Tindakan ini akan memadamkan keseluruhan rekod situasi dan nilai yang telah anda taip secara kekal. Adakah anda pasti?</p>
+            <div class="flex items-center gap-3">
+                <button onclick="tutupModalReset()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition">
+                    Batal
+                </button>
+                <button id="btn-confirm-action" class="w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                    Ya, Padam Semua
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catatan Penutup Footer -->
+    <footer class="bg-slate-950 text-slate-500 py-6 px-6 text-center text-xs border-t border-slate-900 no-print">
+        <p>Aplikasi Latihan Pengurusan Kewangan SEDC Sarawak • Pekan Kapit 2026</p>
+    </footer>
+
+    <script>
+        let rowCounter = 0;
+        let selectedResetType = "";
+
+        window.onload = function() {
+            // Sediakan 10 baris kosong secara lalai (default)
+            for(let i = 0; i < 10; i++) {
+                tambahBarisUrusNiaga();
+            }
+            recalculateBaki();
+        };
+
+        // Fungsi menambah satu baris urus niaga kosong secara dinamik
+        function tambahBarisUrusNiaga() {
+            rowCounter++;
+            const tbody = document.getElementById('manual-ledger-rows');
+            const row = document.createElement('tr');
+            row.id = `row-${rowCounter}`;
+            row.className = "hover:bg-slate-50/50 transition fade-in";
+            
+            row.innerHTML = `
+                <!-- Tarikh -->
+                <td class="py-2.5 px-2 border-r border-slate-200 text-center">
+                    <input type="text" placeholder="HH/BB" class="w-full text-center excel-input font-bold text-slate-600 rounded p-1 text-xs focus:outline-none" id="date-${rowCounter}">
+                </td>
+
+                <!-- Situasi / Butiran -->
+                <td class="py-2.5 px-3 border-r border-slate-200">
+                    <input type="text" placeholder="Contoh: Jualan burger daging, bayar sewa gerai..." class="w-full excel-input font-semibold text-slate-800 rounded p-1.5 text-xs focus:outline-none" id="desc-${rowCounter}">
+                </td>
+
+                <!-- Kategori Lejar Dropdown (Telah mengeluarkan LEJAR MODAL) -->
+                <td class="py-2.5 px-2 border-r border-slate-200 text-center">
+                    <select class="w-full bg-transparent excel-input rounded p-1 text-[11px] font-black text-slate-600 focus:outline-none" id="lejar-${rowCounter}">
+                        <option value="">-- PILIH LEJAR --</option>
+                        <option value="JUALAN">LEJAR JUALAN</option>
+                        <option value="BELIAN">LEJAR BELIAN</option>
+                        <option value="HASIL">LEJAR HASIL</option>
+                        <option value="BELANJA">LEJAR BELANJA</option>
+                    </select>
+                </td>
+
+                <!-- Debit (Tunai) -->
+                <td class="py-2.5 px-2 border-r border-emerald-100 bg-emerald-50/10">
+                    <input type="number" step="0.01" placeholder="0.00" oninput="recalculateBaki()" class="w-full text-center excel-input font-mono text-xs font-black text-emerald-700 rounded p-1 focus:outline-none" id="dt-${rowCounter}">
+                </td>
+
+                <!-- Debit (Bank) -->
+                <td class="py-2.5 px-2 border-r border-slate-200 bg-emerald-50/10">
+                    <input type="number" step="0.01" placeholder="0.00" oninput="recalculateBaki()" class="w-full text-center excel-input font-mono text-xs font-black text-emerald-700 rounded p-1 focus:outline-none" id="db-${rowCounter}">
+                </td>
+
+                <!-- Kredit (Tunai) -->
+                <td class="py-2.5 px-2 border-r border-rose-100 bg-rose-50/10">
+                    <input type="number" step="0.01" placeholder="0.00" oninput="recalculateBaki()" class="w-full text-center excel-input font-mono text-xs font-black text-rose-700 rounded p-1 focus:outline-none" id="kt-${rowCounter}">
+                </td>
+
+                <!-- Kredit (Bank) -->
+                <td class="py-2.5 px-2 border-r border-slate-200 bg-rose-50/10">
+                    <input type="number" step="0.01" placeholder="0.00" oninput="recalculateBaki()" class="w-full text-center excel-input font-mono text-xs font-black text-rose-700 rounded p-1 focus:outline-none" id="kb-${rowCounter}">
+                </td>
+
+                <!-- Baki Tunai (Dihitung) -->
+                <td class="py-2.5 px-4 border-r border-slate-100 text-center font-mono font-black text-slate-800" id="bt-baki-${rowCounter}">RM 0.00</td>
+
+                <!-- Baki Bank (Dihitung) -->
+                <td class="py-2.5 px-4 border-r border-slate-200 text-center font-mono font-black text-slate-800" id="bb-baki-${rowCounter}">RM 0.00</td>
+
+                <!-- Butang Padam Baris -->
+                <td class="py-2.5 px-2 text-center no-print">
+                    <button onclick="padamBaris(${rowCounter})" class="text-rose-500 hover:text-rose-700 transition"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+            recalculateBaki();
+            kemaskiniStatistik();
+        }
+
+        // Padam satu baris yang dipilih
+        function padamBaris(id) {
+            const row = document.getElementById(`row-${id}`);
+            if (row) {
+                row.remove();
+                recalculateBaki();
+                kemaskiniStatistik();
+            }
+        }
+
+        // Pengiraan formula running balance dinamik (Excel engine style)
+        function recalculateBaki() {
+            const tbody = document.getElementById('manual-ledger-rows');
+            const rows = tbody.getElementsByTagName('tr');
+            
+            let runningTunai = 0;
+            let runningBank = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const rowId = rows[i].id.replace('row-', '');
+                
+                // Dapatkan nilai input atau anggap 0 jika kosong
+                const dt = parseFloat(document.getElementById(`dt-${rowId}`).value) || 0;
+                const db = parseFloat(document.getElementById(`db-${rowId}`).value) || 0;
+                const kt = parseFloat(document.getElementById(`kt-${rowId}`).value) || 0;
+                const kb = parseFloat(document.getElementById(`kb-${rowId}`).value) || 0;
+
+                // Tambah wang masuk, tolak wang keluar
+                runningTunai += (dt - kt);
+                runningBank += (db - kb);
+
+                // Kemas kini lajur baki akhir baris harian
+                const cellBakiTunai = document.getElementById(`bt-baki-${rowId}`);
+                const cellBakiBank = document.getElementById(`bb-baki-${rowId}`);
+
+                if (cellBakiTunai) {
+                    cellBakiTunai.innerText = `RM ${runningTunai.toFixed(2)}`;
+                    cellBakiTunai.className = runningTunai < 0 ? "py-2.5 px-4 border-r border-slate-100 text-center font-mono font-black text-rose-600" : "py-2.5 px-4 border-r border-slate-100 text-center font-mono font-black text-slate-800";
+                }
+                if (cellBakiBank) {
+                    cellBakiBank.innerText = `RM ${runningBank.toFixed(2)}`;
+                    cellBakiBank.className = runningBank < 0 ? "py-2.5 px-4 border-r border-slate-200 text-center font-mono font-black text-rose-600" : "py-2.5 px-4 border-r border-slate-200 text-center font-mono font-black text-slate-800";
+                }
+            }
+
+            // Kemas kini jumlah keseluruhan atas dashboard ringkasan
+            document.getElementById('lbl-total-tunai').innerText = `RM ${runningTunai.toFixed(2)}`;
+            document.getElementById('lbl-total-bank').innerText = `RM ${runningBank.toFixed(2)}`;
+
+            // Kemas kini status warna baki tunai
+            const lblStatusTunai = document.getElementById('lbl-status-tunai');
+            if (runningTunai < 0) {
+                lblStatusTunai.innerText = "ALIRAN TUNAI SESAK (NEGATIF)";
+                lblStatusTunai.className = "text-[9px] font-bold text-rose-500 uppercase";
+            } else if (runningTunai === 0) {
+                lblStatusTunai.innerText = "Baki Kosong";
+                lblStatusTunai.className = "text-[9px] font-bold text-slate-400 uppercase";
+            } else {
+                lblStatusTunai.innerText = "Aliran Tunai Sihat";
+                lblStatusTunai.className = "text-[9px] font-bold text-emerald-600 uppercase";
+            }
+
+            // Kemas kini status warna baki bank
+            const lblStatusBank = document.getElementById('lbl-status-bank');
+            if (runningBank < 0) {
+                lblStatusBank.innerText = "AKAUN BANK OVERDRAWN";
+                lblStatusBank.className = "text-[9px] font-bold text-rose-500 uppercase";
+            } else if (runningBank === 0) {
+                lblStatusBank.innerText = "Baki Kosong";
+                lblStatusBank.className = "text-[9px] font-bold text-slate-400 uppercase";
+            } else {
+                lblStatusBank.innerText = "Aliran Bank Sihat";
+                lblStatusBank.className = "text-[9px] font-bold text-emerald-600 uppercase";
+            }
+        }
+
+        // Mengemas kini jumlah kaunter bilangan baris aktif
+        function kemaskiniStatistik() {
+            const tbody = document.getElementById('manual-ledger-rows');
+            const totalRows = tbody.getElementsByTagName('tr').length;
+            document.getElementById('lbl-total-rekod').innerText = `${totalRows} Baris`;
+        }
+
+        // --- SISTEM MODAL TOAST RESET / PADAM KUSTOM ---
+        function paparModalReset() {
+            selectedResetType = "RESET_ALL";
+            document.getElementById('reset-modal-text').innerText = "Tindakan ini akan memadamkan kesemua 10 baris serta baris baharu yang anda tambah secara kekal, dan mengembalikannya kepada lembaran asal kosong. Adakah anda pasti?";
+            document.getElementById('btn-confirm-action').className = "w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition";
+            document.getElementById('btn-confirm-action').innerText = "Ya, Set Semula Semua";
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function kosongkanSemuaNilai() {
+            selectedResetType = "CLEAR_VALUES";
+            document.getElementById('reset-modal-text').innerText = "Tindakan ini hanya akan mengosongkan nilai teks situations, pilihan lejar, dan angka yang telah anda isi tanpa memadamkan struktur bilangan baris semasa. Adakah anda pasti?";
+            document.getElementById('btn-confirm-action').className = "w-1/2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition";
+            document.getElementById('btn-confirm-action').innerText = "Ya, Padam Nilai Sahaja";
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function tutupModalReset() {
+            document.getElementById('reset-modal').classList.add('hidden');
+            selectedResetType = "";
+        }
+
+        // Pengurusan butang sahkan pada modal
+        document.getElementById('btn-confirm-action').onclick = function() {
+            if (selectedResetType === "RESET_ALL") {
+                // Padam semua baris dan gantikan semula dengan 10 baris baru yang betul-betul bersih
+                const tbody = document.getElementById('manual-ledger-rows');
+                tbody.innerHTML = "";
+                rowCounter = 0;
+                for(let i = 0; i < 10; i++) {
+                    tambahBarisUrusNiaga();
+                }
+            } else if (selectedResetType === "CLEAR_VALUES") {
+                // Hanya reset nilai input sahaja tetapi kekalkan baris
+                const tbody = document.getElementById('manual-ledger-rows');
+                const rows = tbody.getElementsByTagName('tr');
+                for (let i = 0; i < rows.length; i++) {
+                    const id = rows[i].id.replace('row-', '');
+                    document.getElementById(`date-${id}`).value = "";
+                    document.getElementById(`desc-${id}`).value = "";
+                    document.getElementById(`lejar-${id}`).value = "";
+                    document.getElementById(`dt-${id}`).value = "";
+                    document.getElementById(`db-${id}`).value = "";
+                    document.getElementById(`kt-${id}`).value = "";
+                    document.getElementById(`kb-${id}`).value = "";
+                }
+            }
+            recalculateBaki();
+            kemaskiniStatistik();
+            tutupModalReset();
+        };
+    </script>
+</body>
+</html>
