@@ -55,6 +55,27 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
 
+    <!-- Navigation Bar -->
+    <nav class="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-3 px-6 shadow-lg border-b-4 border-emerald-500 no-print">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap text-emerald-400 text-xl"></i>
+                <span class="font-black text-sm">TRAINING PORTAL</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 justify-center">
+                <a href="index.html" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-calculator"></i> Kalkulator Kos
+                </a>
+                <a href="templat_buku_tunai_lejar_manual.html" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-table"></i> Templat Buku Tunai
+                </a>
+                <a href="panduan_pengiraan_kos_harga_sedia_cetak_pdf.html" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-book"></i> Panduan Kos
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <!-- Header Aplikasi -->
     <header class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-850 text-white py-6 px-6 shadow-md border-b border-emerald-950 no-print">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
@@ -367,7 +388,7 @@
         // --- SISTEM MODAL TOAST RESET / PADAM KUSTOM ---
         function paparModalReset() {
             selectedResetType = "RESET_ALL";
-            document.getElementById('reset-modal-text').innerText = "Tindakan ini akan memadamkan kesemua 10 baris serta baris baharu yang anda tambah secara kekal, dan mengembalikannya kepada lembaran asal kosong. Adakah anda pasti?";
+            document.getElementById('reset-modal-text').innerText = "Tindakan ini akan memadamkan kesemua 10 baris serta baris baharu yang anda tambah secara kekal, dan mengembalikannya kepada lembaran kosong yang sedia awal.";
             document.getElementById('btn-confirm-action').className = "w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition";
             document.getElementById('btn-confirm-action').innerText = "Ya, Set Semula Semua";
             document.getElementById('reset-modal').classList.remove('hidden');
@@ -375,7 +396,7 @@
 
         function kosongkanSemuaNilai() {
             selectedResetType = "CLEAR_VALUES";
-            document.getElementById('reset-modal-text').innerText = "Tindakan ini hanya akan mengosongkan nilai teks situations, pilihan lejar, dan angka yang telah anda isi tanpa memadamkan struktur bilangan baris semasa. Adakah anda pasti?";
+            document.getElementById('reset-modal-text').innerText = "Tindakan ini hanya akan mengosongkan nilai teks situations, pilihan lejar, dan angka yang telah anda isi tanpa memadamkan struktur baris-baris yang sudah ada.";
             document.getElementById('btn-confirm-action').className = "w-1/2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition";
             document.getElementById('btn-confirm-action').innerText = "Ya, Padam Nilai Sahaja";
             document.getElementById('reset-modal').classList.remove('hidden');
