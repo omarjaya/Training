@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ms" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UndiKita - Sistem Pembuatan Poll Interaktif</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom scrollbar for better UI */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Navigasi Atas -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/95">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-primary-200">
+                        <i class="fa-solid fa-square-poll-vertical text-xl"></i>
+                    </div>
+                    <span class="text-xl font-extrabold bg-gradient-to-r from-primary-600 to-indigo-600 bg-clip-text text-transparent">UndiKita</span>
+                </div>
+                
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <button onclick="switchTab('senarai')" id="tab-senarai-btn" class="nav-tab px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-primary-50 text-primary-600">
+                        <i class="fa-solid fa-list-ul mr-1.5"></i> Senarai Poll
+                    </button>
+                    <button onclick="switchTab('buat')" id="tab-buat-btn" class="nav-tab px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200">
+                        <i class="fa-solid fa-plus mr-1.5"></i> Cipta Poll
+                    </button>
+                    <button onclick="switchTab('statistik')" id="tab-statistik-btn" class="nav-tab px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200">
+                        <i class="fa-solid fa-chart-pie mr-1.5"></i> Prestasi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Kandungan Utama -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Papan Ringkasan Maklumat (Slaid Atas) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Jumlah Poll Aktif</p>
+                    <h3 id="stat-active-polls" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Jumlah Undi Terkumpul</p>
+                    <h3 id="stat-total-votes" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl shadow-inner">
+                    <i class="fa-solid fa-check-to-slot"></i>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kadar Penyertaan</p>
+                    <h3 id="stat-participation" class="text-3xl font-black text-slate-800 mt-1">0%</h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: CIPTA POLL BARU -->
+        <section id="tab-buat" class="hidden max-w-2xl mx-auto">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+                <div class="border-b border-slate-100 pb-5 mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800">Cipta Poll Baharu</h2>
+                    <p class="text-slate-500 text-sm mt-1">Rancang dan bina sistem undian ringkas anda dalam beberapa saat sahaja.</p>
+                </div>
+
+                <form id="form-buat-poll" onsubmit="createPoll(event)" class="space-y-6">
+                    <!-- Tajuk Poll -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Soalan / Tajuk Poll <span class="text-rose-500">*</span></label>
+                        <input type="text" id="poll-title" required placeholder="Contoh: Di manakah destinasi percutian impian anda tahun ini?" 
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none">
+                    </div>
+
+                    <!-- Deskripsi Poll -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Penerangan / Deskripsi <span class="text-slate-400 font-normal">(Pilihan)</span></label>
+                        <textarea id="poll-desc" rows="3" placeholder="Sila berikan maklumat lanjut atau syarat untuk pengundi di sini..." 
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none resize-none"></textarea>
+                    </div>
+
+                    <!-- Pilihan Jawapan -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-semibold text-slate-700">Pilihan Jawapan <span class="text-rose-500">*</span></label>
+                            <span class="text-xs text-slate-400" id="options-count">Minima 2 Pilihan</span>
+                        </div>
+                        
+                        <div id="options-container" class="space-y-3">
+                            <!-- Input Pilihan Jawapan Dinamik di sini -->
+                            <div class="flex items-center space-x-2 option-input-group">
+                                <span class="text-slate-400 font-medium text-sm w-6">1.</span>
+                                <input type="text" required placeholder="Contoh Pilihan A" class="poll-option-input w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none">
+                                <div class="w-10"></div> <!-- Placeholder to match remove button space -->
+                            </div>
+                            <div class="flex items-center space-x-2 option-input-group">
+                                <span class="text-slate-400 font-medium text-sm w-6">2.</span>
+                                <input type="text" required placeholder="Contoh Pilihan B" class="poll-option-input w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none">
+                                <div class="w-10"></div>
+                            </div>
+                        </div>
+
+                        <!-- Butang Tambah Pilihan -->
+                        <button type="button" onclick="addNewOptionField()" class="mt-3 flex items-center justify-center space-x-2 text-sm font-semibold text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-4 py-2.5 rounded-xl w-full transition-all">
+                            <i class="fa-solid fa-circle-plus"></i>
+                            <span>Tambah Pilihan Jawapan</span>
+                        </button>
+                    </div>
+
+                    <!-- Tetapan Lanjutan -->
+                    <div class="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Tarikh Tamat -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Tarikh Tamat <span class="text-slate-400 font-normal">(Pilihan)</span></label>
+                            <input type="datetime-local" id="poll-expiry" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500-focus:border-primary-500 transition-all outline-none text-slate-600">
+                        </div>
+
+                        <!-- Pilihan Ganda -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Jenis Undian</label>
+                            <select id="poll-multiple" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none text-slate-600">
+                                <option value="single">Satu Pilihan Sahaja (Radio)</option>
+                                <option value="multiple">Boleh Pilih Lebih Dari Satu (Checkbox)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Butang Hantar -->
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-primary-200 hover:shadow-xl hover:shadow-primary-300 transition-all flex items-center justify-center space-x-2 text-base">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Terbitkan Poll Sekarang</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB 2: SENARAI POLL -->
+        <section id="tab-senarai" class="space-y-6">
+            <!-- Carian & Penapis -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:w-96">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="search-input" oninput="filterPolls()" placeholder="Cari tajuk poll..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all">
+                </div>
+
+                <div class="flex items-center space-x-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                    <button onclick="filterStatus('all')" class="status-filter-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-primary-600 text-white shadow-sm transition-all whitespace-nowrap">Semua</button>
+                    <button onclick="filterStatus('active')" class="status-filter-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap">Aktif</button>
+                    <button onclick="filterStatus('ended')" class="status-filter-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap">Tamat</button>
+                </div>
+            </div>
+
+            <!-- Kad Grid Poll -->
+            <div id="polls-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Poll Card ditapis dan dipaparkan melalui JS -->
+            </div>
+
+            <!-- State Kosong -->
+            <div id="empty-state" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 max-w-md mx-auto">
+                <div class="w-20 h-20 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-700">Tiada Poll Ditemui</h3>
+                <p class="text-slate-500 text-sm mt-1">Cuba taip carian lain atau cipta poll baharu sekarang untuk memulakan undian.</p>
+                <button onclick="switchTab('buat')" class="mt-5 inline-flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Cipta Poll Pertama</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- TAB 3: STATISTIK & KEPUTUSAN TERPERINCI -->
+        <section id="tab-statistik" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8">
+                <div class="max-w-2xl mx-auto text-center mb-8">
+                    <span class="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-xs font-extrabold uppercase tracking-wider">Hasil Terkini</span>
+                    <h2 class="text-3xl font-extrabold text-slate-800 mt-2">Keputusan Undian</h2>
+                    <p class="text-slate-500 text-sm mt-1">Pilih mana-mana poll dari senarai pilihan di bawah untuk melihat carta keputusan penuh secara masa-nyata.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Senarai Pilihan Poll (Kiri) -->
+                    <div class="lg:col-span-1 border-r border-slate-100 pr-0 lg:pr-6 space-y-3">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Tajuk Poll</label>
+                        <div id="stats-poll-list" class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                            <!-- Diisi oleh JS -->
+                        </div>
+                    </div>
+
+                    <!-- Panel Analisis Visual (Kanan) -->
+                    <div class="lg:col-span-2">
+                        <div id="stats-detail-card" class="bg-slate-50 p-6 rounded-2xl border border-slate-200 min-h-[300px] flex flex-col justify-center">
+                            <!-- Diisi oleh JS mengikut poll yang dipilih -->
+                            <div class="text-center py-8 text-slate-400">
+                                <i class="fa-solid fa-chart-column text-5xl mb-4"></i>
+                                <p class="font-medium">Sila pilih satu poll di sebelah kiri untuk melihat pecahan data keputusan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL UNDI (VOTING MODAL) -->
+    <div id="vote-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 transform scale-95 transition-transform duration-300 overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header Modal -->
+            <div class="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex justify-between items-start">
+                <div>
+                    <span id="modal-badge-status" class="inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wide bg-emerald-100 text-emerald-800 mb-2">Aktif</span>
+                    <h3 id="modal-title" class="text-lg font-bold text-slate-800 leading-snug">Tajuk Undian</h3>
+                </div>
+                <button onclick="closeVoteModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-2 rounded-xl transition-all">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Kandungan Pilihan -->
+            <div class="p-6 overflow-y-auto flex-grow space-y-4">
+                <p id="modal-desc" class="text-sm text-slate-500 leading-relaxed">Sila buat pilihan terbaik anda daripada opsyen-opsyen yang disenaraikan di bawah.</p>
+                
+                <form id="vote-form" class="space-y-3 pt-2">
+                    <!-- Opsyen-opsyen undi diisi dari JS -->
+                </form>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="p-6 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+                <span id="modal-total-votes" class="text-xs font-bold text-slate-400"><i class="fa-solid fa-users mr-1"></i> 0 Undi Diterima</span>
+                <div class="flex space-x-2">
+                    <button onclick="closeVoteModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">Tutup</button>
+                    <button id="submit-vote-btn" onclick="submitVote()" class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-primary-200">
+                        Hantar Undi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-3 pointer-events-none"></div>
+
+    <!-- Kaki Fail (Footer) -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+        <div class="max-w-6xl mx-auto px-4 text-center text-sm text-slate-400">
+            <p>&copy; 2026 UndiKita. Dibina dengan kasih sayang untuk pengumpulan pendapat yang pantas.</p>
+            <p class="text-xs mt-1">Semua data disimpan secara selamat dalam pelayar web peranti anda.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Global variables & default polls
+        let polls = [];
+        let currentFilterStatus = 'all';
+        let searchQuery = '';
+        let activeVotingPollId = null;
+
+        // Default Data if LocalStorage empty
+        const defaultPolls = [
+            {
+                id: "default-1",
+                title: "Apakah destinasi percutian pilihan anda di Malaysia?",
+                desc: "Undian khas untuk mengumpul pilihan tempat melancong impian sempena percutian akhir tahun.",
+                options: [
+                    { id: "opt-1", text: "Pulau Langkawi, Kedah", votes: 45 },
+                    { id: "opt-2", text: "Kundasang, Sabah", votes: 68 },
+                    { id: "opt-3", text: "Tanah Tinggi Cameron, Pahang", votes: 32 },
+                    { id: "opt-4", text: "Bandar Bersejarah Melaka", votes: 19 }
+                ],
+                isMultiple: false,
+                expiryDate: "2026-12-31T23:59",
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: "default-2",
+                title: "Sarapan pagi kegemaran rakyat Malaysia sepanjang zaman?",
+                desc: "Pilih menu wajib sarapan pagi yang paling tidak boleh anda lepaskan.",
+                options: [
+                    { id: "opt-5", text: "Nasi Lemak Biasa / Ayam Goreng", votes: 120 },
+                    { id: "opt-6", text: "Roti Canai Garing Kuah Campur", votes: 94 },
+                    { id: "opt-7", text: "Mee / Bihun Goreng Mamak", votes: 42 },
+                    { id: "opt-8", text: "Roti Bakar & Telur Goyang", votes: 61 }
+                ],
+                isMultiple: true,
+                expiryDate: "2026-10-15T12:00",
+                createdAt: new Date().toISOString()
+            }
+        ];
+
+        // On Page Load
+        window.onload = function() {
+            // Load from LocalStorage or seed default data
+            const storedPolls = localStorage.getItem('undikita_polls');
+            if (storedPolls) {
+                polls = JSON.parse(storedPolls);
+            } else {
+                polls = defaultPolls;
+                saveToLocalStorage();
+            }
+
+            renderPolls();
+            renderStatsDashboard();
+            setupStatsTabList();
+        }
+
+        // Save data helper
+        function saveToLocalStorage() {
+            localStorage.setItem('undikita_polls', JSON.stringify(polls));
+        }
+
+        // Custom Toast Alert replacement for `alert()`
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl border shadow-xl flex items-start space-x-3 max-w-sm pointer-events-auto transform translate-y-2 opacity-0 transition-all duration-300 bg-white`;
+            
+            let iconColor = 'text-blue-500';
+            let icon = 'fa-circle-info';
+            let borderColor = 'border-blue-100';
+            
+            if (type === 'success') {
+                iconColor = 'text-emerald-500';
+                icon = 'fa-circle-check';
+                borderColor = 'border-emerald-100';
+            } else if (type === 'warning') {
+                iconColor = 'text-amber-500';
+                icon = 'fa-triangle-exclamation';
+                borderColor = 'border-amber-100';
+            } else if (type === 'error') {
+                iconColor = 'text-rose-500';
+                icon = 'fa-circle-xmark';
+                borderColor = 'border-rose-100';
+            }
+
+            toast.classList.add(borderColor);
+            toast.innerHTML = `
+                <div class="${iconColor} text-lg mt-0.5"><i class="fa-solid ${icon}"></i></div>
+                <div class="flex-grow">
+                    <h4 class="text-sm font-bold text-slate-800">${title}</h4>
+                    <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+            `;
+
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            // Auto dismiss toast after 4 seconds
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => { toast.remove(); }, 300);
+            }, 4000);
+        }
+
+        // Tab switching logic
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.getElementById('tab-buat').classList.add('hidden');
+            document.getElementById('tab-senarai').classList.add('hidden');
+            document.getElementById('tab-statistik').classList.add('hidden');
+            
+            // Un-highlight all tab buttons
+            const buttons = document.querySelectorAll('.nav-tab');
+            buttons.forEach(btn => {
+                btn.className = "nav-tab px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200";
+            });
+
+            // Show active tab & button
+            if (tabId === 'buat') {
+                document.getElementById('tab-buat').classList.remove('hidden');
+                document.getElementById('tab-buat-btn').className = "nav-tab px-3 py-2 rounded-lg text-sm font-semibold bg-primary-50 text-primary-600 transition-all duration-200";
+            } else if (tabId === 'senarai') {
+                document.getElementById('tab-senarai').classList.remove('hidden');
+                document.getElementById('tab-senarai-btn').className = "nav-tab px-3 py-2 rounded-lg text-sm font-semibold bg-primary-50 text-primary-600 transition-all duration-200";
+                renderPolls(); // Refresh list just in case
+            } else if (tabId === 'statistik') {
+                document.getElementById('tab-statistik').classList.remove('hidden');
+                document.getElementById('tab-statistik-btn').className = "nav-tab px-3 py-2 rounded-lg text-sm font-semibold bg-primary-50 text-primary-600 transition-all duration-200";
+                setupStatsTabList();
+            }
+        }
+
+        // Add dynamic input for options
+        function addNewOptionField() {
+            const container = document.getElementById('options-container');
+            const childCount = container.children.length;
+            
+            if (childCount >= 10) {
+                showToast("Had Pilihan", "Anda tidak boleh menambah lebih dari 10 pilihan jawapan.", "warning");
+                return;
+            }
+
+            const optionDiv = document.createElement('div');
+            optionDiv.className = "flex items-center space-x-2 option-input-group transform translate-y-1 opacity-0 transition-all duration-200";
+            optionDiv.innerHTML = `
+                <span class="text-slate-400 font-medium text-sm w-6">${childCount + 1}.</span>
+                <input type="text" required placeholder="Contoh Pilihan Baru" class="poll-option-input w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none">
+                <button type="button" onclick="removeOptionField(this)" class="w-10 h-10 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-xl transition-all"><i class="fa-solid fa-trash-can"></i></button>
+            `;
+            container.appendChild(optionDiv);
+            
+            setTimeout(() => {
+                optionDiv.classList.remove('translate-y-1', 'opacity-0');
+            }, 50);
+
+            updateOptionCounters();
+        }
+
+        // Remove options dynamically
+        function removeOptionField(button) {
+            const container = document.getElementById('options-container');
+            if (container.children.length <= 2) {
+                showToast("Sekatan Had", "Setiap poll memerlukan sekurang-kurangnya 2 pilihan jawapan.", "warning");
+                return;
+            }
+            button.closest('.option-input-group').remove();
+            updateOptionCounters();
+        }
+
+        function updateOptionCounters() {
+            const container = document.getElementById('options-container');
+            const inputs = container.querySelectorAll('.option-input-group');
+            inputs.forEach((input, index) => {
+                input.querySelector('span').innerText = `${index + 1}.`;
+            });
+        }
+
+        // Handle Form Submission for creating a Poll
+        function createPoll(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('poll-title').value.trim();
+            const desc = document.getElementById('poll-desc').value.trim();
+            const expiry = document.getElementById('poll-expiry').value;
+            const isMultiple = document.getElementById('poll-multiple').value === 'multiple';
+
+            // Extract option inputs
+            const optionInputs = document.querySelectorAll('.poll-option-input');
+            const options = [];
+            let uniqueIdIndex = 1;
+            
+            optionInputs.forEach(input => {
+                const val = input.value.trim();
+                if (val) {
+                    options.push({
+                        id: `opt-${Date.now()}-${uniqueIdIndex++}`,
+                        text: val,
+                        votes: 0
+                    });
+                }
+            });
+
+            if (options.length < 2) {
+                showToast("Gagal", "Sila masukkan sekurang-kurangnya 2 pilihan jawapan.", "error");
+                return;
+            }
+
+            // Create object
+            const newPoll = {
+                id: `poll-${Date.now()}`,
+                title: title,
+                desc: desc || "Tiada penerangan diberikan.",
+                options: options,
+                isMultiple: isMultiple,
+                expiryDate: expiry || null,
+                createdAt: new Date().toISOString()
+            };
+
+            // Add to database
+            polls.unshift(newPoll);
+            saveToLocalStorage();
+
+            // Reset form
+            document.getElementById('form-buat-poll').reset();
+            // Reset option fields back to 2 default
+            const container = document.getElementById('options-container');
+            container.innerHTML = `
+                <div class="flex items-center space-x-2 option-input-group">
+                    <span class="text-slate-400 font-medium text-sm w-6">1.</span>
+                    <input type="text" required placeholder="Contoh Pilihan A" class="poll-option-input w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none">
+                    <div class="w-10"></div>
+                </div>
+                <div class="flex items-center space-x-2 option-input-group">
+                    <span class="text-slate-400 font-medium text-sm w-6">2.</span>
+                    <input type="text" required placeholder="Contoh Pilihan B" class="poll-option-input w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none">
+                    <div class="w-10"></div>
+                </div>
+            `;
+
+            showToast("Berjaya!", "Siri undian atau poll anda telah selamat diterbitkan.", "success");
+            renderStatsDashboard();
+            switchTab('senarai');
+        }
+
+        // Check if Poll is Expired
+        function isPollExpired(poll) {
+            if (!poll.expiryDate) return false;
+            const now = new Date();
+            const expiry = new Date(poll.expiryDate);
+            return now > expiry;
+        }
+
+        // Render card lists
+        function renderPolls() {
+            const grid = document.getElementById('polls-grid');
+            const emptyState = document.getElementById('empty-state');
+            grid.innerHTML = '';
+
+            let filtered = polls.filter(poll => {
+                // Search filter
+                const matchesSearch = poll.title.toLowerCase().includes(searchQuery.toLowerCase());
+                if (!matchesSearch) return false;
+
+                // Status filter
+                const isExpired = isPollExpired(poll);
+                if (currentFilterStatus === 'active') return !isExpired;
+                if (currentFilterStatus === 'ended') return isExpired;
+                return true; // 'all'
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                grid.classList.add('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+                grid.classList.remove('hidden');
+            }
+
+            filtered.forEach(poll => {
+                const isExpired = isPollExpired(poll);
+                const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                
+                // Expiry Badge
+                let statusBadge = '';
+                if (isExpired) {
+                    statusBadge = `<span class="bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider"><i class="fa-regular fa-clock mr-1"></i> Tamat</span>`;
+                } else {
+                    statusBadge = `<span class="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider"><i class="fa-regular fa-circle-check mr-1"></i> Aktif</span>`;
+                }
+
+                // Expiry Text
+                let expiryText = 'Seterusnya';
+                if (poll.expiryDate) {
+                    const d = new Date(poll.expiryDate);
+                    expiryText = `Tamat pada: ${d.toLocaleDateString('ms-MY')} ${d.toLocaleTimeString('ms-MY', {hour: '2-digit', minute:'2-digit'})}`;
+                } else {
+                    expiryText = 'Undian sentiasa terbuka';
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 hover:border-primary-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-3">
+                            ${statusBadge}
+                            <span class="text-xs font-semibold text-slate-400"><i class="fa-solid fa-users mr-1"></i> ${totalVotes} Undi</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 line-clamp-2 hover:line-clamp-none transition-all duration-300">${poll.title}</h3>
+                        <p class="text-slate-500 text-sm mt-1.5 line-clamp-3">${poll.desc}</p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col space-y-3">
+                        <div class="flex justify-between items-center text-xs text-slate-400">
+                            <span>${expiryText}</span>
+                            <span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-medium text-[10px]">${poll.isMultiple ? 'Boleh Ganda' : 'Pilihan Tunggal'}</span>
+                        </div>
+                        
+                        <div class="flex space-x-2 pt-1">
+                            ${isExpired ? `
+                                <button onclick="selectPollForStats('${poll.id}')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center space-x-1.5">
+                                    <i class="fa-solid fa-chart-column"></i>
+                                    <span>Lihat Keputusan</span>
+                                </button>
+                            ` : `
+                                <button onclick="openVoteModal('${poll.id}')" class="flex-grow bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center space-x-1.5 shadow-sm shadow-primary-100">
+                                    <i class="fa-solid fa-check-to-slot"></i>
+                                    <span>Undi Sekarang</span>
+                                </button>
+                                <button onclick="copyShareLink('${poll.id}')" class="w-12 bg-slate-50 hover:bg-slate-100 text-slate-500 border border-slate-200 rounded-xl flex items-center justify-center transition-all hover:text-slate-700" title="Salin Pautan Kongsi">
+                                    <i class="fa-regular fa-share-from-square"></i>
+                                </button>
+                            `}
+                            <button onclick="deletePoll('${poll.id}')" class="w-10 h-10 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl flex items-center justify-center transition-all" title="Padam Undian">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Filtering Actions
+        function filterStatus(status) {
+            currentFilterStatus = status;
+            
+            const buttons = document.querySelectorAll('.status-filter-btn');
+            buttons.forEach(btn => {
+                btn.className = "status-filter-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all whitespace-nowrap";
+            });
+
+            // Highlight chosen button
+            event.target.className = "status-filter-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-primary-600 text-white shadow-sm transition-all whitespace-nowrap";
+            
+            renderPolls();
+        }
+
+        function filterPolls() {
+            searchQuery = document.getElementById('search-input').value;
+            renderPolls();
+        }
+
+        // Delete Poll (with Confirmation replacement)
+        let pollToDeleteId = null;
+        function deletePoll(id) {
+            // Confirm implementation without utilizing system alert
+            const selectPoll = polls.find(p => p.id === id);
+            if (!selectPoll) return;
+
+            const confirmAction = confirm(`Adakah anda pasti mahu memadamkan poll "${selectPoll.title}"?`);
+            if (confirmAction) {
+                polls = polls.filter(p => p.id !== id);
+                saveToLocalStorage();
+                renderPolls();
+                renderStatsDashboard();
+                setupStatsTabList();
+                showToast("Dipadam", "Poll telah berjaya dipadamkan.", "info");
+            }
+        }
+
+        // Copy Share Link Helper
+        function copyShareLink(id) {
+            const dummyText = `${window.location.origin}${window.location.pathname}?pollId=${id}`;
+            
+            // Textarea fallback approach as recommended
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = dummyText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempTextArea);
+            
+            showToast("Telah Disalin", "Pautan terus bagi undian ini telah disimpan ke papan keratan.", "success");
+        }
+
+        // Vote Modal Actions
+        function openVoteModal(id) {
+            const poll = polls.find(p => p.id === id);
+            if (!poll) return;
+            if (isPollExpired(poll)) {
+                showToast("Had Tempoh", "Undian ini telah pun ditamatkan.", "warning");
+                return;
+            }
+
+            activeVotingPollId = id;
+            document.getElementById('modal-title').innerText = poll.title;
+            document.getElementById('modal-desc').innerText = poll.desc || "Sila buat pilihan terbaik anda daripada opsyen-opsyen yang disenaraikan di bawah.";
+            
+            const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+            document.getElementById('modal-total-votes').innerHTML = `<i class="fa-solid fa-users mr-1"></i> ${totalVotes} Undi Diterima`;
+
+            // Setup Options in Modal Form
+            const form = document.getElementById('vote-form');
+            form.innerHTML = '';
+
+            poll.options.forEach(option => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = "flex items-center space-x-3 p-3.5 rounded-xl border border-slate-200 hover:border-primary-300 hover:bg-slate-50 transition-all cursor-pointer relative";
+                
+                const inputType = poll.isMultiple ? 'checkbox' : 'radio';
+                const inputName = poll.isMultiple ? `opt-${option.id}` : 'poll-option';
+
+                optionDiv.innerHTML = `
+                    <input type="${inputType}" id="${option.id}" name="${inputName}" value="${option.id}" class="w-4 h-4 text-primary-600 border-slate-300 focus:ring-primary-500 cursor-pointer">
+                    <label for="${option.id}" class="text-sm font-semibold text-slate-700 w-full cursor-pointer ml-2 py-0.5 select-none">${option.text}</label>
+                `;
+                
+                // Allow clicking anywhere inside the card to toggle radio/checkbox
+                optionDiv.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const inputElement = optionDiv.querySelector('input');
+                        inputElement.checked = !inputElement.checked;
+                    }
+                });
+
+                form.appendChild(optionDiv);
+            });
+
+            // Open Modal Transition
+            const modal = document.getElementById('vote-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.transform').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeVoteModal() {
+            const modal = document.getElementById('vote-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('.transform').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                activeVotingPollId = null;
+            }, 300);
+        }
+
+        // Submit Vote
+        function submitVote() {
+            if (!activeVotingPollId) return;
+            const poll = polls.find(p => p.id === activeVotingPollId);
+            if (!poll) return;
+
+            const selectedOptions = [];
+            const formInputs = document.getElementById('vote-form').querySelectorAll('input');
+            
+            formInputs.forEach(input => {
+                if (input.checked) {
+                    selectedOptions.push(input.value);
+                }
+            });
+
+            if (selectedOptions.length === 0) {
+                showToast("Pilihan Kosong", "Sila tandakan sekurang-kurangnya satu pilihan sebelum menghantar.", "warning");
+                return;
+            }
+
+            // Save vote inside dataset
+            poll.options.forEach(option => {
+                if (selectedOptions.includes(option.id)) {
+                    option.votes += 1;
+                }
+            });
+
+            saveToLocalStorage();
+            renderPolls();
+            renderStatsDashboard();
+            
+            showToast("Terima Kasih!", "Suara anda sangat bernilai. Undian telah direkodkan.", "success");
+            closeVoteModal();
+            
+            // Automatically select for stats view and show stats tab
+            setTimeout(() => {
+                switchTab('statistik');
+                selectPollForStats(poll.id);
+            }, 400);
+        }
+
+        // Dashboard Stat Cards Update
+        function renderStatsDashboard() {
+            let totalVotesCount = 0;
+            let activeCount = 0;
+            
+            polls.forEach(poll => {
+                const total = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                totalVotesCount += total;
+                if (!isPollExpired(poll)) activeCount++;
+            });
+
+            document.getElementById('stat-active-polls').innerText = activeCount;
+            document.getElementById('stat-total-votes').innerText = totalVotesCount;
+
+            const participation = polls.length > 0 ? Math.round(totalVotesCount / polls.length) : 0;
+            document.getElementById('stat-participation').innerText = `${participation} undi/poll`;
+        }
+
+        // Setup Right side Stat selection list
+        function setupStatsTabList() {
+            const listContainer = document.getElementById('stats-poll-list');
+            listContainer.innerHTML = '';
+
+            if (polls.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">Tiada poll aktif tersedia.</p>`;
+                return;
+            }
+
+            polls.forEach(poll => {
+                const button = document.createElement('button');
+                button.className = "w-full text-left p-3 rounded-xl hover:bg-slate-50 transition-all text-sm font-semibold border border-transparent hover:border-slate-100 flex items-center justify-between";
+                button.onclick = () => selectPollForStats(poll.id);
+                button.id = `btn-stats-${poll.id}`;
+                
+                const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                const isExpired = isPollExpired(poll);
+                const dotColor = isExpired ? 'bg-slate-300' : 'bg-emerald-500';
+
+                button.innerHTML = `
+                    <div class="flex items-center space-x-2 truncate">
+                        <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
+                        <span class="truncate text-slate-700">${poll.title}</span>
+                    </div>
+                    <span class="text-xs text-slate-400 font-normal shrink-0 ml-1">${totalVotes} undi</span>
+                `;
+                listContainer.appendChild(button);
+            });
+        }
+
+        // Render detailed results analysis
+        function selectPollForStats(pollId) {
+            const poll = polls.find(p => p.id === pollId);
+            if (!poll) return;
+
+            // Highlight selected in list
+            const buttons = document.querySelectorAll('[id^="btn-stats-"]');
+            buttons.forEach(btn => {
+                btn.className = "w-full text-left p-3 rounded-xl hover:bg-slate-50 transition-all text-sm font-semibold border border-transparent hover:border-slate-100 flex items-center justify-between";
+            });
+            
+            const selectedBtn = document.getElementById(`btn-stats-${pollId}`);
+            if (selectedBtn) {
+                selectedBtn.className = "w-full text-left p-3 rounded-xl bg-primary-50 hover:bg-primary-50/80 transition-all text-sm font-bold border border-primary-100 text-primary-700 flex items-center justify-between";
+            }
+
+            const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+            const statusText = isPollExpired(poll) ? 'Undian Ditutup' : 'Undian Berjalan';
+            const statusColor = isPollExpired(poll) ? 'text-rose-500' : 'text-emerald-500';
+
+            const card = document.getElementById('stats-detail-card');
+            card.innerHTML = `
+                <div class="flex flex-col h-full">
+                    <!-- Head Info -->
+                    <div class="border-b border-slate-200 pb-4 mb-5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-xs font-extrabold uppercase tracking-widest ${statusColor}"><i class="fa-solid fa-circle mr-1 text-[8px]"></i> ${statusText}</span>
+                            <span class="text-xs text-slate-400 font-semibold"><i class="fa-solid fa-users mr-1"></i> ${totalVotes} Jumlah Pilihan Undi</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mt-2">${poll.title}</h3>
+                        <p class="text-xs text-slate-400 mt-1">Dibuat pada: ${new Date(poll.createdAt).toLocaleDateString('ms-MY')}</p>
+                    </div>
+
+                    <!-- Progress Bars Visual -->
+                    <div class="space-y-4 flex-grow">
+                        ${poll.options.map((opt, index) => {
+                            const percent = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+                            // Predefined modern color schemes for different options
+                            const colorSchemes = [
+                                'from-primary-500 to-indigo-500', 
+                                'from-cyan-500 to-blue-500', 
+                                'from-emerald-400 to-teal-500',
+                                'from-amber-400 to-orange-500',
+                                'from-fuchsia-400 to-pink-500'
+                            ];
+                            const currentScheme = colorSchemes[index % colorSchemes.length];
+
+                            return `
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">${opt.text}</span>
+                                        <span class="text-slate-900 font-bold">${percent}% <span class="text-slate-400 font-normal">(${opt.votes} undi)</span></span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner">
+                                        <div class="bg-gradient-to-r ${currentScheme} h-full rounded-full transition-all duration-1000" style="width: ${percent}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-6 pt-4 border-t border-slate-200 flex flex-wrap gap-2 justify-between items-center">
+                        <span class="text-xs text-slate-400">Peringatan: Undian dikemaskini terus mengikut peranti anda.</span>
+                        <div class="flex space-x-2">
+                            <button onclick="resetVotes('${poll.id}')" class="px-3 py-1.5 border border-rose-200 hover:bg-rose-50 text-rose-500 rounded-lg text-xs font-bold transition-all flex items-center space-x-1">
+                                <i class="fa-solid fa-rotate-left"></i>
+                                <span>Padam Rekod Undi</span>
+                            </button>
+                            <button onclick="copyShareLink('${poll.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-all flex items-center space-x-1">
+                                <i class="fa-regular fa-share-from-square"></i>
+                                <span>Kongsi</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Reset votes for a specific Poll
+        function resetVotes(id) {
+            const poll = polls.find(p => p.id === id);
+            if (!poll) return;
+
+            const confirmAction = confirm(`Adakah anda bersetuju untuk mengosongkan semua undian (set semula kepada 0) untuk poll "${poll.title}"?`);
+            if (confirmAction) {
+                poll.options.forEach(opt => opt.votes = 0);
+                saveToLocalStorage();
+                renderPolls();
+                renderStatsDashboard();
+                selectPollForStats(id);
+                showToast("Direset", "Jumlah undian bagi poll ini telah dikembalikan ke sifar.", "info");
+            }
+        }
+    </script>
+</body>
+</html>
